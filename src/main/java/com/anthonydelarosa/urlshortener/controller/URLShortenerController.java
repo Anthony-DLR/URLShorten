@@ -11,7 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.anthonydelarosa.urlshortener.entity.ShortenedURL;
+import com.anthonydelarosa.urlshortener.service.ShortenedURLService;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -19,16 +20,24 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping(value = "/urlShortener")
 public class URLShortenerController {
-    @PostMapping
-    public ResponseEntity create(@RequestBody final String url) {
-        final UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
-        if (!urlValidator.isValid(url)) {
-            return ResponseEntity.badRequest().body(new ShortenedURLError("Invalid URL."));
-        }
 
+    @Autowired
+    private ShortenedURLService service;
+
+    private ShortenedURL shortURL;
+
+    @PostMapping
+    public ShortenedURL create(@RequestBody final String url) {
+        final UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
+        /***if (!urlValidator.isValid(url)) {
+            return ResponseEntity.badRequest().body(new ShortenedURLError("Invalid URL."));
+        }***/
         final ShortenedURLModel shortened = ShortenedURLModel.create(url);
         log.info("URL id generated = {}", shortened.getId());
+        this.shortURL = new ShortenedURL();
+        this.shortURL.setLong_url(url);
+        this.shortURL.setShortened_url(shortened.getId());
 
-        return ResponseEntity.noContent().header("id", shortened.getId()).build();
+        return service.saveURL(shortURL);
     }
 }
