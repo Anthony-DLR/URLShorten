@@ -14,4 +14,8 @@ public class ShortenedURLService {
     public ShortenedURL saveURL(ShortenedURL product) {
         return shortenedURLTableRepository.save(product);
     }
+
+    public ShortenedURL getURLByShort(String shortened_url) {
+        return shortenedURLTableRepository.findByShortenedurl(shortened_url);
+    }
 }

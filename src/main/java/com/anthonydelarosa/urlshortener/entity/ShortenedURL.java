@@ -17,6 +17,6 @@ public class ShortenedURL {
     @Id
     @GeneratedValue
     private int id;
-    private String shortened_url;
-    private String long_url;
+    private String shortenedurl;
+    private String longurl;
 }

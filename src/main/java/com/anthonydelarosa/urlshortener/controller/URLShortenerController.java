@@ -35,9 +35,14 @@ public class URLShortenerController {
         final ShortenedURLModel shortened = ShortenedURLModel.create(url);
         log.info("URL id generated = {}", shortened.getId());
         this.shortURL = new ShortenedURL();
-        this.shortURL.setLong_url(url);
-        this.shortURL.setShortened_url(shortened.getId());
+        this.shortURL.setLongurl(url);
+        this.shortURL.setShortenedurl(shortened.getId());
 
         return service.saveURL(shortURL);
+    }
+
+    @GetMapping
+    public ShortenedURL find(@RequestBody final String shortened_url) {
+        return service.getURLByShort(shortened_url);
     }
 }
