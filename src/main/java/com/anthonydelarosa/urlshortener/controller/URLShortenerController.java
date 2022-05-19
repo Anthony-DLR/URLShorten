@@ -44,9 +44,9 @@ public class URLShortenerController {
     public ResponseEntity create(@RequestBody final String url) {
         final UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
         if (!urlValidator.isValid(url)) {
-            response = new JSONObject();
-            response.put("url", "invalid");
-            return ResponseEntity.ok(response);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid URL");
         }
         final ShortenedURLModel shortened = ShortenedURLModel.create(url);
         log.info("URL id generated = {}", shortened.getId());
@@ -58,13 +58,19 @@ public class URLShortenerController {
 
     }
 
-    @GetMapping
-    public ResponseEntity find(@RequestBody final String shortened_url) {
-        ShortenedURL databaseFetch = service.getURLByShort(shortened_url);
+    @GetMapping(value = "/{shortUrl}")
+    public ResponseEntity find(@PathVariable final String shortUrl) {
+        ShortenedURL databaseFetch = service.getURLByShort(shortUrl);
 
         Date dt = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String currentTime = sdf.format(dt);
+
+        if(databaseFetch == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("ShortURL Not Found");
+        }
 
         ClickDateTimeModel click = ClickDateTimeModel.create(databaseFetch.getId(), currentTime);
         this.singleClick = new ClickDateTime();
@@ -72,25 +78,19 @@ public class URLShortenerController {
         this.singleClick.setShortenedurlid(click.getShortenedurlid());
 
         clickService.saveClick(singleClick);
-
-        if(databaseFetch == null) {
-            response = new JSONObject();
-            response.put("id", "invalid");
-            return ResponseEntity.ok(response);
-        }
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(databaseFetch.getLongurl()))
                 .build();
     }
 
-    @RequestMapping(value = "/clicks", method = RequestMethod.GET)
+    @RequestMapping(value = "/clicks/{shortUrl}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getClicks(@RequestBody final String shortened_url) {
-        ShortenedURL databaseFetch = service.getURLByShort(shortened_url);
+    public ResponseEntity getClicks(@PathVariable final String shortUrl) {
+        ShortenedURL databaseFetch = service.getURLByShort(shortUrl);
         if(databaseFetch == null) {
-            response = new JSONObject();
-            response.put("id", "invalid");
-            return ResponseEntity.ok(response);
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("ShortURL Not Found");
         }
 
         List<ClickDateTime> clicks = clickService.getClicksByShortenedURLId(databaseFetch.getId());
