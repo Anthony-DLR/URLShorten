@@ -41,26 +41,21 @@ public class URLShortenerController {
 
 
     @PostMapping
-    public JSONObject create(@RequestBody final String url) {
+    public ResponseEntity create(@RequestBody final String url) {
         final UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
         if (!urlValidator.isValid(url)) {
             response = new JSONObject();
             response.put("url", "invalid");
-            return response;
+            return ResponseEntity.ok(response);
         }
         final ShortenedURLModel shortened = ShortenedURLModel.create(url);
         log.info("URL id generated = {}", shortened.getId());
         this.shortURL = new ShortenedURL();
         this.shortURL.setLongurl(url);
         this.shortURL.setShortenedurl(shortened.getId());
-        service.saveURL(shortURL);
 
-        response = new JSONObject();
-        response.put("id", shortURL.getId());
-        response.put("shortenedurl", shortURL.getShortenedurl());
-        response.put("longurl", shortURL.getLongurl());
+        return ResponseEntity.ok(service.saveURL(shortURL));
 
-        return response;
     }
 
     @GetMapping
