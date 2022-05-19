@@ -1,6 +1,7 @@
 package com.anthonydelarosa.urlshortener.controller;
 
 import com.anthonydelarosa.urlshortener.model.ShortenedURLModel;
+import org.json.simple.JSONObject;
 import com.anthonydelarosa.urlshortener.exception.ShortenedURLError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.anthonydelarosa.urlshortener.entity.ShortenedURL;
 import com.anthonydelarosa.urlshortener.service.ShortenedURLService;
+
+import java.net.URI;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -25,24 +28,42 @@ public class URLShortenerController {
     private ShortenedURLService service;
 
     private ShortenedURL shortURL;
+    private JSONObject response;
+
 
     @PostMapping
-    public ShortenedURL create(@RequestBody final String url) {
+    public JSONObject create(@RequestBody final String url) {
         final UrlValidator urlValidator = new UrlValidator(new String[]{"http", "https"});
-        /***if (!urlValidator.isValid(url)) {
-            return ResponseEntity.badRequest().body(new ShortenedURLError("Invalid URL."));
-        }***/
+        if (!urlValidator.isValid(url)) {
+            response = new JSONObject();
+            response.put("url", "invalid");
+            return response;
+        }
         final ShortenedURLModel shortened = ShortenedURLModel.create(url);
         log.info("URL id generated = {}", shortened.getId());
         this.shortURL = new ShortenedURL();
         this.shortURL.setLongurl(url);
         this.shortURL.setShortenedurl(shortened.getId());
+        service.saveURL(shortURL);
 
-        return service.saveURL(shortURL);
+        response = new JSONObject();
+        response.put("id", shortURL.getId());
+        response.put("shortenedurl", shortURL.getShortenedurl());
+        response.put("longurl", shortURL.getLongurl());
+
+        return response;
     }
 
     @GetMapping
-    public ShortenedURL find(@RequestBody final String shortened_url) {
-        return service.getURLByShort(shortened_url);
+    public ResponseEntity find(@RequestBody final String shortened_url) {
+        ShortenedURL databaseFetch = service.getURLByShort(shortened_url);
+        if(databaseFetch == null) {
+            response = new JSONObject();
+            response.put("id", "invalid");
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(databaseFetch.getLongurl()))
+                .build();
     }
 }
