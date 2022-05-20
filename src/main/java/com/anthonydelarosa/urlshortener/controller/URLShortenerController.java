@@ -36,7 +36,7 @@ public class URLShortenerController {
     private ClickDateTimeService clickService;
 
     private ShortenedURL shortURL;
-    private ClickDateTime singleClick;
+
     private JSONObject response;
 
 
@@ -48,13 +48,8 @@ public class URLShortenerController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body("Invalid URL");
         }
-        final ShortenedURLModel shortened = ShortenedURLModel.create(url);
-        log.info("URL id generated = {}", shortened.getId());
-        this.shortURL = new ShortenedURL();
-        this.shortURL.setLongurl(url);
-        this.shortURL.setShortenedurl(shortened.getId());
 
-        return ResponseEntity.ok(service.saveURL(shortURL));
+        return ResponseEntity.ok(service.saveURL(url));
 
     }
 
@@ -72,12 +67,7 @@ public class URLShortenerController {
                     .body("ShortURL Not Found");
         }
 
-        ClickDateTimeModel click = ClickDateTimeModel.create(databaseFetch.getId(), currentTime);
-        this.singleClick = new ClickDateTime();
-        this.singleClick.setDatetime(click.getDateTime());
-        this.singleClick.setShortenedurlid(click.getShortenedurlid());
-
-        clickService.saveClick(singleClick);
+        clickService.saveClick(databaseFetch.getId(), currentTime);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(databaseFetch.getLongurl()))
                 .build();
