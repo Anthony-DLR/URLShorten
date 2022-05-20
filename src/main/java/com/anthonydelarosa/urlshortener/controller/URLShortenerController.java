@@ -57,17 +57,13 @@ public class URLShortenerController {
     public ResponseEntity find(@PathVariable final String shortUrl) {
         ShortenedURL databaseFetch = service.getURLByShort(shortUrl);
 
-        Date dt = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String currentTime = sdf.format(dt);
-
         if(databaseFetch == null) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body("ShortURL Not Found");
         }
 
-        clickService.saveClick(databaseFetch.getId(), currentTime);
+        clickService.saveClick(databaseFetch.getId());
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(databaseFetch.getLongurl()))
                 .build();

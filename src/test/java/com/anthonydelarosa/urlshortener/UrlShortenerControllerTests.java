@@ -91,7 +91,7 @@ class UrlShortenerControllerTests {
 		click.setId(5);
 
 		when(service.getURLByShort(shortUrl)).thenReturn(shortenedURL);
-		when(clickService.saveClick(shortenedURL.getId(), dateTime)).thenReturn(click);
+		when(clickService.saveClick(shortenedURL.getId())).thenReturn(click);
 
 		this.mockMvc.perform(get("/api/1/urlShortener/" + shortUrl)).andDo(print())
 				.andExpect(status().isFound()).andExpect(redirectedUrl(url));
