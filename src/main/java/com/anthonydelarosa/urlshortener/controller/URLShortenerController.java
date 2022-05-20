@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/urlShortener")
+@RequestMapping(value = "/api/1/urlShortener")
 public class URLShortenerController {
 
     @Autowired
