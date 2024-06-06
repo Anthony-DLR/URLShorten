@@ -1,6 +1,5 @@
 # URLShorten
-Hello. My name is Anthony De La Rosa and I am currently applying for the full stack position at Boundless. In this folder you will find the URL shorten project that I 
-was assigned.
+In this folder you will find a sample URL shortener project using Spring and mySQL.
 
 # What you will need to start the application
   * Maven 3.2+
