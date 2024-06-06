@@ -1,5 +1,5 @@
 # URLShorten
-In this folder you will find a sample URL shortener project using Spring and mySQL.
+In this folder you will find a sample URL shortener project using Spring Boot and mySQL.
 
 # What you will need to start the application
   * Maven 3.2+
